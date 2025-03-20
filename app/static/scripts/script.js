@@ -129,34 +129,35 @@ const showTypingEffect = (rawText, htmlText, messageElement, incomingMessageElem
     }, 75);
 };
 
-// Fetch API response based on user input
 const requestApiResponse = async (incomingMessageElement) => {
-    const messageTextElement = incomingMessageElement.querySelector(".message__text");
+    let messageTextElement = incomingMessageElement.querySelector(".message__text");
 
-  
-    // Ensure message is not empty before making the request
-    if (!currentUserMessage || currentUserMessage.trim() === "") {
-    messageTextElement.innerText = "Message cannot be empty.";
-    messageTextElement.closest(".message").classList.add("message--error");
-    return;
-    
-}
+    // Retrieve the user input
+    const inputElement = document.querySelector(".prompt__form-input");
+    const currentUserMessage = inputElement?.value?.trim(); // Ensure input is valid
+
+    if (!currentUserMessage) {
+        messageTextElement.innerText = "Message cannot be empty.";
+        messageTextElement.closest(".message").classList.add("message--error");
+        return;
+    }
+
     try {
         // Determine the correct API route
         const apiUrl = getApiEndpoint(currentUserMessage);
         if (!apiUrl) throw new Error("Invalid request. Check your input format.");
 
-        // Prepare payload based on the selected route
+        // Prepare request body
         let requestBody = {};
         if (apiUrl === API_ROUTES.fileUpload) {
-            // If it's a file upload, send the file data
             requestBody = { file_data: currentUserMessage.split("file:")[1]?.trim() || "" };
+        } else if (apiUrl === API_ROUTES.ragSearch) {
+            requestBody = { query: currentUserMessage };  // ✅ FIXED: Correct key for Flask
         } else {
-            // Other routes expect a query text
             requestBody = { query: currentUserMessage };
         }
 
-        // Make the API request
+        // Make API request
         const response = await fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -177,6 +178,9 @@ const requestApiResponse = async (incomingMessageElement) => {
             apiResponse: responseText
         });
         localStorage.setItem("saved-api-chats", JSON.stringify(savedConversations));
+
+        // Clear input after sending
+        inputElement.value = ""; 
 
     } catch (error) {
         isGeneratingResponse = false;

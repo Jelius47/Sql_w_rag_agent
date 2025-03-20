@@ -133,6 +133,9 @@ from ..agent_graph.load_tools_config import LoadToolsConfig
 from ..agent_graph.build_full_graph import build_graph
 from ..utils.app_utils import create_directory
 from ..utils.memory import Memory
+from langchain_core.messages import HumanMessage
+
+
 
 URL = "https://github.com/Farzad-R/LLM-Zero-to-Hundred/tree/master/RAG-GPT"
 hyperlink = f"[RAG-GPT user guideline]({URL})"
@@ -173,8 +176,11 @@ class ChatBot:
             Tuple: Returns an empty string (representing the new user input placeholder) and the updated conversation history.
         """
         # The config is the **second positional argument** to stream() or invoke()!
+        if not isinstance(message, str) or not message.strip():
+            raise ValueError("Invalid message format. Message must be a non-empty string.")
+
         events = graph.stream(
-            {"messages": [("user", message)]}, config, stream_mode="values"
+            {"messages": [HumanMessage(content=message)]}, config, stream_mode="values"
         )
         for event in events:
             event["messages"][-1].pretty_print()

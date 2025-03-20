@@ -1,3 +1,24 @@
+
+
+// Flask server configuration
+const FLASK_SERVER_URL = "http://127.0.0.1:5000";  // Update if hosted elsewhere
+const API_ROUTES = {
+    webSearch: `${FLASK_SERVER_URL}/web/search`,
+    ragSearch: `${FLASK_SERVER_URL}/rag/search`,
+    fileUpload: `${FLASK_SERVER_URL}/file/upload`,
+    dbQuery: `${FLASK_SERVER_URL}/db/query`
+};
+
+// Determine the appropriate Flask route
+const getApiEndpoint = (message) => {
+    if (message.startsWith("web:")) return API_ROUTES.webSearch;
+    if (message.startsWith("rag:")) return API_ROUTES.ragSearch;
+    if (message.startsWith("file:")) return API_ROUTES.fileUpload;
+    if (message.startsWith("db:")) return API_ROUTES.dbQuery;
+    return API_ROUTES.ragSearch;  // Default to RAG search if no prefix
+};
+
+
 const messageForm = document.querySelector(".prompt__form");
 const chatHistoryContainer = document.querySelector(".chats");
 const suggestionItems = document.querySelectorAll(".suggests__item");
@@ -9,16 +30,10 @@ const clearChatButton = document.getElementById("deleteButton");
 let currentUserMessage = null;
 let isGeneratingResponse = false;
 
-// Flask server configuration
-const FLASK_SERVER_URL = "http://127.0.0.1:5000";  // Update if hosted elsewhere
-const API_ROUTES = {
-    webSearch: `${FLASK_SERVER_URL}/web/search`,
-    ragSearch: `${FLASK_SERVER_URL}/rag/search`,
-    fileUpload: `${FLASK_SERVER_URL}/file/upload`,
-    dbQuery: `${FLASK_SERVER_URL}/db/query`
-};
+// const GOOGLE_API_KEY = "YOUR_API_KEY";
+// const API_REQUEST_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GOOGLE_API_KEY}`;
 
-// Load saved chat history from localStorage
+// Load saved data from local storage
 const loadSavedChatHistory = () => {
     const savedConversations = JSON.parse(localStorage.getItem("saved-api-chats")) || [];
     const isLightTheme = localStorage.getItem("themeColor") === "light_mode";
@@ -28,82 +43,120 @@ const loadSavedChatHistory = () => {
 
     chatHistoryContainer.innerHTML = '';
 
+    // Iterate through saved chat history and display messages
     savedConversations.forEach(conversation => {
-        // Display user message
+        // Display the user's message
         const userMessageHtml = `
+
             <div class="message__content">
                 <img class="message__avatar" src="/static/images/assets/profile.png" alt="User avatar">
-                <p class="message__text">${conversation.userMessage}</p>
+               <p class="message__text">${conversation.userMessage}</p>
             </div>
+        
         `;
-        chatHistoryContainer.appendChild(createChatMessageElement(userMessageHtml, "message--outgoing"));
 
-        // Display API response
+        const outgoingMessageElement = createChatMessageElement(userMessageHtml, "message--outgoing");
+        chatHistoryContainer.appendChild(outgoingMessageElement);
+
+        // Display the API response
+        const responseText = conversation.apiResponse?.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsedApiResponse = marked.parse(responseText); // Convert to HTML
+        const rawApiResponse = responseText; // Plain text version
+
         const responseHtml = `
-        <div class="message__content">
-            <img class="message__avatar" src="/static/images/assets/gemini.svg" alt="Bot avatar">
-            <p class="message__text">${conversation.apiResponse}</p>
-        </div>
-    `;
-    
-        chatHistoryContainer.appendChild(createChatMessageElement(responseHtml, "message--incoming"));
+        
+           <div class="message__content">
+                <img class="message__avatar" src="/static/images/assets/gemini.svg" alt="Gemini avatar">
+                <p class="message__text"></p>
+                <div class="message__loading-indicator hide">
+                    <div class="message__loading-bar"></div>
+                    <div class="message__loading-bar"></div>
+                    <div class="message__loading-bar"></div>
+                </div>
+            </div>
+            <span onClick="copyMessageToClipboard(this)" class="message__icon hide"><i class='bx bx-copy-alt'></i></span>
+        
+        `;
+
+        const incomingMessageElement = createChatMessageElement(responseHtml, "message--incoming");
+        chatHistoryContainer.appendChild(incomingMessageElement);
+
+        const messageTextElement = incomingMessageElement.querySelector(".message__text");
+
+        // Display saved chat without typing effect
+        showTypingEffect(rawApiResponse, parsedApiResponse, messageTextElement, incomingMessageElement, true); // 'true' skips typing
     });
 
     document.body.classList.toggle("hide-header", savedConversations.length > 0);
 };
 
-// Create a chat message element
+// create a new chat message element
 const createChatMessageElement = (htmlContent, ...cssClasses) => {
     const messageElement = document.createElement("div");
     messageElement.classList.add("message", ...cssClasses);
     messageElement.innerHTML = htmlContent;
     return messageElement;
-};
+}
 
-// Determine which route to call based on the user's message
-const determineApiRoute = (message) => {
-    if (message.startsWith("search web")) {
-        return API_ROUTES.webSearch;
-    } else if (message.startsWith("search rag")) {
-        return API_ROUTES.ragSearch;
-    } else if (message.startsWith("upload file")) {
-        return API_ROUTES.fileUpload;
-    } else if (message.startsWith("query db")) {
-        return API_ROUTES.dbQuery;
+// Show typing effect
+const showTypingEffect = (rawText, htmlText, messageElement, incomingMessageElement, skipEffect = false) => {
+    const copyIconElement = incomingMessageElement.querySelector(".message__icon");
+    copyIconElement.classList.add("hide"); // Initially hide copy button
+
+    if (skipEffect) {
+        // Display content directly without typing
+        messageElement.innerHTML = htmlText;
+        hljs.highlightAll();
+        addCopyButtonToCodeBlocks();
+        copyIconElement.classList.remove("hide"); // Show copy button
+        isGeneratingResponse = false;
+        return;
     }
-    return null;
-};
 
-// Adjust API endpoints based on your Flask routes
+    const wordsArray = rawText.split(' ');
+    let wordIndex = 0;
 
-
-// Determine the appropriate Flask route
-const getApiEndpoint = (message) => {
-    if (message.startsWith("web:")) return API_ROUTES.webSearch;
-    if (message.startsWith("rag:")) return API_ROUTES.ragSearch;
-    if (message.startsWith("file:")) return API_ROUTES.fileUpload;
-    if (message.startsWith("db:")) return API_ROUTES.dbQuery;
-    return API_ROUTES.ragSearch;  // Default to RAG search if no prefix
+    const typingInterval = setInterval(() => {
+        messageElement.innerText += (wordIndex === 0 ? '' : ' ') + wordsArray[wordIndex++];
+        if (wordIndex === wordsArray.length) {
+            clearInterval(typingInterval);
+            isGeneratingResponse = false;
+            messageElement.innerHTML = htmlText;
+            hljs.highlightAll();
+            addCopyButtonToCodeBlocks();
+            copyIconElement.classList.remove("hide");
+        }
+    }, 75);
 };
 
 // Fetch API response based on user input
 const requestApiResponse = async (incomingMessageElement) => {
     const messageTextElement = incomingMessageElement.querySelector(".message__text");
 
+  
+    // Ensure message is not empty before making the request
+    if (!currentUserMessage || currentUserMessage.trim() === "") {
+    messageTextElement.innerText = "Message cannot be empty.";
+    messageTextElement.closest(".message").classList.add("message--error");
+    return;
+    
+}
     try {
-        // Select the correct Flask route
+        // Determine the correct API route
         const apiUrl = getApiEndpoint(currentUserMessage);
+        if (!apiUrl) throw new Error("Invalid request. Check your input format.");
 
-        // Prepare payload based on the route
+        // Prepare payload based on the selected route
         let requestBody = {};
         if (apiUrl === API_ROUTES.fileUpload) {
-            // If it's a file upload, adjust accordingly
-            requestBody = { file_data: currentUserMessage.split("file:")[1].trim() };
+            // If it's a file upload, send the file data
+            requestBody = { file_data: currentUserMessage.split("file:")[1]?.trim() || "" };
         } else {
+            // Other routes expect a query text
             requestBody = { query: currentUserMessage };
         }
 
-        // Make the POST request to the Flask server
+        // Make the API request
         const response = await fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -113,7 +166,7 @@ const requestApiResponse = async (incomingMessageElement) => {
         const responseData = await response.json();
         if (!response.ok) throw new Error(responseData.error || "Failed to fetch response.");
 
-        // Extract the response text
+        // Extract response text
         const responseText = responseData.response || "No response received.";
         showTypingEffect(responseText, responseText, messageTextElement, incomingMessageElement);
 
@@ -134,19 +187,50 @@ const requestApiResponse = async (incomingMessageElement) => {
     }
 };
 
+// Add copy button to code blocks
+const addCopyButtonToCodeBlocks = () => {
+    const codeBlocks = document.querySelectorAll('pre');
+    codeBlocks.forEach((block) => {
+        const codeElement = block.querySelector('code');
+        let language = [...codeElement.classList].find(cls => cls.startsWith('language-'))?.replace('language-', '') || 'Text';
 
-// Show loading indicator
+        const languageLabel = document.createElement('div');
+        languageLabel.innerText = language.charAt(0).toUpperCase() + language.slice(1);
+        languageLabel.classList.add('code__language-label');
+        block.appendChild(languageLabel);
+
+        const copyButton = document.createElement('button');
+        copyButton.innerHTML = `<i class='bx bx-copy'></i>`;
+        copyButton.classList.add('code__copy-btn');
+        block.appendChild(copyButton);
+
+        copyButton.addEventListener('click', () => {
+            navigator.clipboard.writeText(codeElement.innerText).then(() => {
+                copyButton.innerHTML = `<i class='bx bx-check'></i>`;
+                setTimeout(() => copyButton.innerHTML = `<i class='bx bx-copy'></i>`, 2000);
+            }).catch(err => {
+                console.error("Copy failed:", err);
+                alert("Unable to copy text!");
+            });
+        });
+    });
+};
+
+// Show loading animation during API request
 const displayLoadingAnimation = () => {
     const loadingHtml = `
+
         <div class="message__content">
-            <img class="message__avatar" src="/static/images/assets/gemini.svg" alt="Bot avatar">
-            <p class="message__text">Loading...</p>
+            <img class="message__avatar" src="/static/images/assets/gemini.svg" alt="Gemini avatar">
+            <p class="message__text"></p>
             <div class="message__loading-indicator">
                 <div class="message__loading-bar"></div>
                 <div class="message__loading-bar"></div>
                 <div class="message__loading-bar"></div>
             </div>
         </div>
+        <span onClick="copyMessageToClipboard(this)" class="message__icon hide"><i class='bx bx-copy-alt'></i></span>
+    
     `;
 
     const loadingMessageElement = createChatMessageElement(loadingHtml, "message--incoming", "message--loading");
@@ -155,45 +239,89 @@ const displayLoadingAnimation = () => {
     requestApiResponse(loadingMessageElement);
 };
 
-// Handle outgoing user message
+// Copy message to clipboard
+const copyMessageToClipboard = (copyButton) => {
+    const messageContent = copyButton.parentElement.querySelector(".message__text").innerText;
+
+    navigator.clipboard.writeText(messageContent);
+    copyButton.innerHTML = `<i class='bx bx-check'></i>`; // Confirmation icon
+    setTimeout(() => copyButton.innerHTML = `<i class='bx bx-copy-alt'></i>`, 1000); // Revert icon after 1 second
+};
+
+// Handle sending chat messages
 const handleOutgoingMessage = () => {
-    currentUserMessage = messageForm.querySelector(".prompt__form-input").value.trim();
-    if (!currentUserMessage || isGeneratingResponse) return;
+    currentUserMessage = messageForm.querySelector(".prompt__form-input").value.trim() || currentUserMessage;
+    if (!currentUserMessage || isGeneratingResponse) return; // Exit if no message or already generating response
 
     isGeneratingResponse = true;
 
     const outgoingMessageHtml = `
+    
         <div class="message__content">
             <img class="message__avatar" src="/static/images/assets/profile.png" alt="User avatar">
-            <p class="message__text">${currentUserMessage}</p>
+            <p class="message__text"></p>
         </div>
+
     `;
 
-    chatHistoryContainer.appendChild(createChatMessageElement(outgoingMessageHtml, "message--outgoing"));
-    messageForm.reset();
-    setTimeout(displayLoadingAnimation, 500);
+    const outgoingMessageElement = createChatMessageElement(outgoingMessageHtml, "message--outgoing");
+    outgoingMessageElement.querySelector(".message__text").innerText = currentUserMessage;
+    chatHistoryContainer.appendChild(outgoingMessageElement);
+
+    messageForm.reset(); // Clear input field
+    document.body.classList.add("hide-header");
+    setTimeout(displayLoadingAnimation, 500); // Show loading animation after delay
 };
 
-// Clear chat history
-clearChatButton.addEventListener("click", () => {
+// Toggle between light and dark themes
+themeToggleButton.addEventListener('click', () => {
+    const isLightTheme = document.body.classList.toggle("light_mode");
+    localStorage.setItem("themeColor", isLightTheme ? "light_mode" : "dark_mode");
+
+    // Update icon based on theme
+    const newIconClass = isLightTheme ? "bx bx-moon" : "bx bx-sun";
+    themeToggleButton.querySelector("i").className = newIconClass;
+});
+
+// Clear all chat history
+clearChatButton.addEventListener('click', () => {
     if (confirm("Are you sure you want to delete all chat history?")) {
         localStorage.removeItem("saved-api-chats");
+
+        // Reload chat history to reflect changes
         loadSavedChatHistory();
+
+        currentUserMessage = null;
+        isGeneratingResponse = false;
     }
 });
 
-// Toggle theme
-themeToggleButton.addEventListener("click", () => {
-    const isLightTheme = document.body.classList.toggle("light_mode");
-    localStorage.setItem("themeColor", isLightTheme ? "light_mode" : "dark_mode");
-    themeToggleButton.innerHTML = isLightTheme ? '<i class="bx bx-moon"></i>' : '<i class="bx bx-sun"></i>';
+// Handle click on suggestion items
+suggestionItems.forEach(suggestion => {
+    suggestion.addEventListener('click', () => {
+        currentUserMessage = suggestion.querySelector(".suggests__item-text").innerText;
+        handleOutgoingMessage();
+    });
 });
 
-// Send message on form submission
-messageForm.addEventListener("submit", (e) => {
+// Prevent default from submission and handle outgoing message
+messageForm.addEventListener('submit', (e) => {
     e.preventDefault();
     handleOutgoingMessage();
 });
+function sendQuery() {
+    const messageInput = document.querySelector(".message__text"); // Select input field
+    let currentUserMessage = messageInput.value.trim(); // Get the message and remove extra spaces
+
+    if (!currentUserMessage) {
+        alert("Please enter a prompt before sending!"); // Prevent sending empty messages
+        return;
+    }
+
+    handleOutgoingMessage(currentUserMessage); // Pass the message
+    messageInput.value = ""; // Clear input field after sending
+}
+
 
 // Load saved chat history on page load
 loadSavedChatHistory();

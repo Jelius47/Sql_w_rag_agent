@@ -15,6 +15,7 @@ vectorstores/
 flagged
 # C extensions
 *.so
+patches.zip
 # Distribution / packaging
 .Python
 build/

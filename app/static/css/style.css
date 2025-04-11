@@ -150,97 +150,90 @@ body.hide-header .header{
     border-radius: 50%;
 }
 
-/* General container */
+/* Container at bottom */
 .prompt {
     position: fixed;
-    background: var(--primary-color);  /* Set your primary color */
-    z-index: 1000;
-    width: 100%;
-    left: 0;
     bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--primary-color);
+    z-index: 1000;
     padding: 1rem;
+  }
+  
+  /* Input wrapper */
+  .prompt__input-wrapper {
     display: flex;
-    justify-content: center;  /* Center the chat panel */
-}
-
-/* Input wrapper */
-.prompt__input-wrapper {
-    width: 90%;  /* Adjust width to fit inside */
-    max-width: 900px;  /* Max width for the input area */
-    height: 50px;  /* Height of the panel */
-    display: flex;
-    justify-content: space-between;  /* Distribute the elements */
-    align-items: center;  /* Vertically center items */
-    border-radius: 30px;
-    background: var(--secondary-color);  /* Set a background color */
-    padding: 0.5rem;
-}
-
-/* Input field style */
-.prompt__form-input {
-    flex: 1;  /* Allow the input to grow and take available space */
-    height: 40px;
-    font-size: 1rem;
-    color: var(--text-color);
-    padding: 0 1rem;  /* Padding inside the input */
-    border-radius: 20px;  /* Rounded corners */
-    border: 1px solid var(--input-border-color);
-    background: var(--input-bg-color);  /* Light background for input */
-    outline: none;
-    transition: background 0.3s ease;
-}
-
-/* Input focus styling */
-.prompt__form-input:focus {
-    background: var(--focus-color);
-    border: 1px solid var(--focus-border-color);
-}
-
-/* Button general styling */
-.prompt__form-button {
-    width: 40px;
-    height: 40px;
+    align-items: flex-end;
+    width: 100%;
+    gap: 0.5rem;
+    position: relative;
+  }
+  
+  /* Upload/send/delete buttons */
+  .prompt__form-button {
+    border: none;
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 1.4rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
-    border-radius: 50%;
-    background: transparent;
     color: var(--text-color);
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-/* Button hover effect */
-.prompt__form-button:hover {
-    background: var(--button-hover-color);  /* Hover color */
-}
-
-/* Upload Button */
-.prompt__form-button#uploadButton {
-    background: var(--upload-btn-bg);  /* Custom background for the upload button */
-}
-
-/* Send Button */
-.prompt__form-button#sendButton {
-    background: var(--send-btn-bg);  /* Custom background for send button */
-}
-
-/* Icon style inside the buttons */
-.prompt__form-button i {
-    font-size: 1.5rem;  /* Adjust icon size */
-}
-
-/* Style for the input field when typing */
-.prompt__form-input:valid ~ #sendButton {
-    opacity: 1;  /* Send button appears when text is entered */
-}
-
-/* Send button disabled when input is empty */
-.prompt__form-input:valid ~ #sendButton:disabled {
-    opacity: 0.5;
-}
+    background: transparent;
+    transition: all 0.3s ease;
+  }
+  
+  .prompt__form-button:hover {
+    background: var(--button-hover-color);
+  }
+  
+  #uploadButton {
+    order: 0;
+  }
+  
+  /* Textarea (expanding upward) */
+  .prompt__form-input {
+    flex-grow: 1;
+    resize: none;
+    overflow-y: auto;
+    min-height: 40px;
+    max-height: 200px;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 20px;
+    border: none;
+    line-height: 1.5;
+    background: #3b3a3a;
+    color: white;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #333;
+  }
+  
+  .prompt__form-input::-webkit-scrollbar {
+    width: 6px;
+  }
+  .prompt__form-input::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 10px;
+  }
+  
+  /* Show send button only when input has text */
+  #sendButton {
+    transform: scale(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .prompt__form-input:valid ~ #sendButton {
+    transform: scale(1);
+  }
+  
+  .prompt__form-input:valid ~ #deleteButton {
+    margin-right: 0.5rem;
+  }
+  
 
 .prompt__disclaim{
     text-align: center;
@@ -370,7 +363,39 @@ body.hide-header .header{
     }
 
 }
+/* Markdown styling */
+.message__text h2, 
+.message__text h3 {
+    margin: 1rem 0 0.5rem;
+    line-height: 1.3;
+}
 
+.message__text a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.message__text a:hover {
+    text-decoration: underline;
+}
+
+.message__text p {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+.message__text em {
+    color: #666;
+    font-size: 0.9em;
+    font-style: italic;
+}
+
+.message__text hr {
+    border: 0;
+    height: 1px;
+    background: #eee;
+    margin: 1rem 0;
+}
 .code__copy-btn{
     background-color: transparent;
     border: none;
@@ -472,15 +497,50 @@ blockquote{
         font-size: 2.5rem;
     }
 
-    .suggests{
+    /* .suggests{
         justify-content: center;
     }
 
     .suggests__item:nth-child(3),
     .suggests__item:nth-child(4){
         display: none;
+    } */
+    .suggests {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 1rem 0;
     }
-
+    
+    .suggests__item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f0f0f0;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        flex: 1 1 calc(50% - 1rem);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    
+    .suggests__item:hover {
+        background-color: #e2e8f0;
+        transform: translateY(-2px);
+    }
+    
+    .suggests__item-text {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .suggests__item-icon i {
+        font-size: 1.5rem;
+        color: #0077cc;
+    }
+    
     .message{
         padding: 0 1.5rem;
     }

@@ -1,108 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+		<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
 
-    <title>Data PRO</title>
-</head>
+		<title>Data PRO</title>
+	</head>
 
-<body>
+	<body>
 
-    <nav class="navbar">
-        <h3 class="navbar__logo">Proffessional</h3>
-        <button class="navbar__button" id="themeToggler"><i class='bx bx-sun'></i></button>
-    </nav>
+		<nav class="navbar">
+			<h3 class="navbar__logo">Proffessional</h3>
+			<button class="navbar__button" id="themeToggler"><i class='bx bx-sun'></i></button>
+		</nav>
 
-    <header class="header">
-        <div class="header__title">
-            <h1>Hello, There!</h1>
-            <h2>How can I help you today?</h2>
-        </div>
-        <div class="suggests">
-            <div class="suggests__item">
-                <p class="suggests__item-text">Upload data for analysis</p>
-                <div class="suggests__item-icon">
-                    <i class='bx bx-stopwatch'></i>
-                </div>
-            </div>
-            <div class="suggests__item">
-                <p class="suggests__item-text">Search from the web</p>
-                <div class="suggests__item-icon">
-                    <i class='bx bx-edit-alt'></i>
-                </div>
-            </div>
-            <div class="suggests__item">
-                <p class="suggests__item-text">Find out Figures in Data Base</p>
-                <div class="suggests__item-icon">
-                    <i class='bx bx-compass'></i>
-                </div>
-            </div>
-            <div class="suggests__item">
-                <p class="suggests__item-text">Ask explanatory questions the Database</p>
-                <div class="suggests__item-icon">
-                    <i class='bx bx-wrench'></i>
-                </div>
-            </div>
-        </div>
-        
-    </header>
+		<header class="header">
+			<div class="header__title">
+				<h1>Hello, There!</h1>
+				<h2>How can I help you today?</h2>
+			</div>
+			<div class="suggests">
+				<!-- Upload button with special handling -->
+				<div class="suggests__item" class="prompt__form-button" id="uploadButton" onclick="triggerFileUpload()">
+					<p class="suggests__item-text">Upload data for analysis</p>
+					<div class="suggests__item-icon">
+						<i class='bx bx-upload'></i>
+					</div>
+					<input type="file" id="fileInput" style="display: none;" accept=".csv,.xlsx,.xls" />
+				</div>
+				
+				<!-- Regular suggestion items -->
+				<div class="suggests__item">
+					<p class="suggests__item-text">How Search from the web works</p>
+					<div class="suggests__item-icon">
+						<i class='bx bx-globe'></i>
+					</div>
+				</div>
+				<div class="suggests__item">
+					<p class="suggests__item-text">Find out Figures in Data Base</p>
+					<div class="suggests__item-icon">
+						<i class='bx bx-bar-chart'></i>
+					</div>
+				</div>
+				<div class="suggests__item">
+					<p class="suggests__item-text">Ask explanatory questions about the Database</p>
+					<div class="suggests__item-icon">
+						<i class='bx bx-question-mark'></i>
+					</div>
+				</div>
+			</div>
+			
 
-    <section class="chats"></section>
+		</header>
 
-    <section class="prompt">
-        <!-- <form action="#" class="prompt__form" novalidate>
-            <div class="prompt__input-wrapper">
-                <input type="text" placeholder="Enter a prompt here" class="prompt__form-input" required>
-                <button class="prompt__form-button" id="sendButton">
-                    <i class='bx bx-send'></i>
-                </button>
-                <button class="prompt__form-button" id="deleteButton">
-                    <i class='bx bx-trash'></i>
-                </button>
-            </div>
-        </form> -->
-        <form action="#" class="prompt__form" novalidate>
-            
-            <div class="prompt">
-                <div class="prompt__input-wrapper">
-                    <!-- Upload Button -->
-                    <button type="button" onclick="triggerFileUpload()" class="prompt__form-button" id="uploadButton">
-                        <i class="bx bx-upload"></i>
-                    </button>
-                    <input type="file" id="fileInput" style="display: none;" onchange="handleFileUpload(event)">
-                    
-                    <!-- Text Input -->
-                    <input type="text" placeholder="Enter a prompt here" class="prompt__form-input" required>
-                    
-                    <!-- Send Button -->
-                    <button type="button" onclick="sendQuery()" class="prompt__form-button" id="sendButton">
-                        <i class="bx bx-send"></i>
-                    </button>
-                    <!-- delete chat history -->
-                    <button class="prompt__form-button" id="deleteButton">
-                        <i class='bx bx-trash'></i>
-                    </button>
-                </div>
-            </div>
-            
-        </form>
-        
-        <p class="prompt__disclaim">
-           Data Pro may display inaccurate info, including about people, so double-check its responses.
-        </p>
-    </section>
+		<section class="chats"></section>
 
+		<section class="prompt">
+			<form action="#" class="prompt__form" novalidate>
+			  <div class="prompt__input-wrapper">
+				<button type="button" onclick="triggerFileUpload()" class="prompt__form-button" id="uploadButton">
+					<i class="bx bx-upload"></i>
+				</button>
+				<input type="file" id="fileInput" style="display: none;" onchange="handleFileUpload(event)" accept=".csv,.xlsx,.xls" />
 
+				<textarea placeholder="Enter a prompt here" class="prompt__form-input" rows="1" required></textarea>
+				
+				<button type="submit"  class="prompt__form-button" id="sendButton">
+				  <i class="bx bx-send"></i>
+				</button>
+				<button type="button" class="prompt__form-button" id="deleteButton">
+				  <i class='bx bx-trash'></i>
+				</button>
+			  </div>
+			</form>
+		  
+			<p class="prompt__disclaim">
+			  Data Pro may display inaccurate info, including about people, so double-check its responses.
+			</p>
+		  </section>
+		  
+		<script>
+			const textarea = document.querySelector('.prompt__form-input');
+			const sendButton = document.getElementById('sendButton');
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
-</body>
+			// Auto-resize the textarea as user types
+			textarea.addEventListener('input', function () {
+			this.style.height = 'auto';
+			const maxHeight = 200;
+			const newHeight = this.scrollHeight;
+			this.style.height = (newHeight > maxHeight ? maxHeight : newHeight) + 'px';
+			});
+
+			// Add Enter key functionality
+			textarea.addEventListener('keydown', function(event) {
+			// Check if Enter key was pressed without Shift key
+			if (event.key === 'Enter' && !event.shiftKey) {
+				// Prevent the default action (new line)
+				event.preventDefault();
+				
+				// Simulate a click on the send button
+				sendButton.click();
+				
+				// Reset the textarea height after sending
+				setTimeout(() => {
+				this.style.height = 'auto';
+				}, 0);
+			}
+			});
+
+			// Reset textarea height after form submission
+			document.querySelector('.prompt__form').addEventListener('submit', function() {
+			setTimeout(() => {
+				textarea.style.height = 'auto';
+			}, 0);
+			});
+		  </script>
+		<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+		<script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
+	</body>
 
 </html>

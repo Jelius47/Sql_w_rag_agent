@@ -1,7 +1,7 @@
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, START
 from langchain_openai import ChatOpenAI
-from ..agent_graph.tool_chinook_sqlagent import query_chinook_sqldb
+from ..agent_graph.tool_chinook_sqlagent import query_postgres_db
 from ..agent_graph.tool_travel_sqlagent import query_travel_sqldb
 from ..agent_graph.tool_lookup_policy_rag import lookup_swiss_airline_policy
 from ..agent_graph.tool_tavily_search import load_tavily_search_tool
@@ -55,7 +55,7 @@ def build_graph():
              lookup_swiss_airline_policy,
              lookup_stories,
              query_travel_sqldb,
-             query_chinook_sqldb,
+             query_postgres_db,
              ]
     # Tell the LLM which tools it can call
     primary_llm_with_tools = primary_llm.bind_tools(tools)
@@ -71,7 +71,7 @@ def build_graph():
             lookup_swiss_airline_policy,
             lookup_stories,
             query_travel_sqldb,
-            query_chinook_sqldb,
+            query_postgres_db,
         ])
     graph_builder.add_node("tools", tool_node)
     # The `tools_condition` function returns "tools" if the chatbot asks to use a tool, and "__end__" if

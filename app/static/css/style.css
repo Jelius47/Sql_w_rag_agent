@@ -40,42 +40,130 @@
     --placeholder-color: #717075;
 }
 
-body{
+body {
     background: var(--primary-color);
+    color: var(--text-color);
+    padding: 1rem;
+  }
+  
+ /* Root chat styles */
+#chatWindow,
+#chatHistoryContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 824px;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
-.header,
-#chatWindow .message,
-#chatWindow .message .message__content,
-.prompt__form {
-    margin: 0 auto;
-    max-width: 824px;
-}
-
-/* Optional: Message styling for clarity */
+/* Shared message styles */
 .message {
-    padding: 0.75rem;
-    margin-bottom: 0.5rem;
-    border-radius: 6px;
-    background-color: #f2f2f2;
+  display: flex;
+  align-items: flex-end;
+  max-width: 80%;
 }
 
-.message.user {
-    background-color: #d1e7dd;
-    text-align: right;
+/* Incoming (bot) message */
+.message--incoming {
+  flex-direction: row;
+  align-self: flex-start;
 }
 
-.message.bot {
-    background-color: #f8d7da;
-    text-align: left;
+.message--incoming .message__content {
+  background-color: var(--secondary-color);
+  color: #fff;
+  border-top-left-radius: 0;
+  border-top-right-radius: 12px;
 }
 
+/* Outgoing (user) message */
+.message--outgoing {
+  flex-direction: row-reverse;
+  align-self: flex-end;
+  align-self: center; /* Anchor to center of the container */
+  width: 100%;
+}
+
+.message--outgoing .message__content {
+  margin-left: auto; /* Push bubble to the right side */
+  background-color: var(--focus-hover-color);
+  color: #fff;
+  border-top-right-radius: 0;
+  border-top-left-radius: 12px;
+  max-width: 60%;
+}
+ 
+/* Bubble appearance */
 .message__content {
-    font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  line-height: 1.5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Sidebar Styling */
-.sidebar {
+/* Avatar image */
+.message__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+/* Message text */
+.message__text {
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+/* Optional: loading or error states */
+.message--loading .message__text {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.message--error .message__text {
+  color: rgba(231, 111, 123, 0.87);
+}
+
+  
+  
+  
+  /* Message Container Padding */
+  .header,
+  .prompt__form {
+    max-width: 824px;
+    margin: 0 auto;
+  }
+  
+  .prompt__form {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--primary-color);
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    z-index: 999;
+  }
+  
+  /* Input Styling */
+  .prompt__form input[type="text"] {
+    width: 100%;
+    max-width: 800px;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 20px;
+    background-color: var(--focus-color);
+    color: var(--text-color);
+  }
+  
+  /* Sidebar Styling (Optional for ChatGPT-Like UI) */
+  .sidebar {
     position: fixed;
     top: 0;
     left: 0;
@@ -126,11 +214,6 @@ body{
   .chat-list li:hover {
     background-color: #3e3e5e;
   }
-  
-body.hide-header .header{
-    margin: 0;
-    display: none;
-}
 
 .navbar{
     display: flex;

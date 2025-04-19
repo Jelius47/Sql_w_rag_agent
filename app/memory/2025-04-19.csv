@@ -80,3 +80,79 @@ The table `uploaded_data_595d9f91` contains information related to various detec
 The table serves as a repository for various antivirus detection techniques, categorizing them by tactic and providing detailed descriptions. The data types are primarily character varying, allowing for flexibility in the text content. The table currently holds a variety of detection methods, each with a unique identifier and a description of its functionality in the context of cybersecurity.
 
 If you need further analysis or specific insights, feel free to ask!"
+1,20:04:40,Hi,Hello! How can I assist you today?
+1,20:09:13,Hi Anga,Hello! It seems like you might be referring to someone named Anga. How can I help you today?
+1,20:13:31,hi,Hi again! How can I assist you today?
+1,20:18:07,hi,Hello! How can I help you today?
+1,20:42:20,nothing returned,"It seems like there might have been a misunderstanding. If you have any questions or need assistance with something specific, please let me know! I'm here to help."
+1,20:42:39,give me all the tables,"Here are all the tables in the database:
+
+1. **users**
+2. **chats**
+3. **uploaded_files**
+4. **messages**
+5. **uploaded_data_595d9f91**
+6. **uploaded_data_cd121cbd**
+
+If you need more information about any specific table, feel free to ask!"
+1,20:44:00,explain me aabout the chats available,"It appears that the table `chats` does not contain any records, as indicated by the summary. This means there are currently no entries or data available in the `chats` table.
+
+If you need information about the structure of the table or if you have any other questions, please let me know!"
+1,20:44:42,okay explain me on all the uploaded data,"### Summary of Uploaded Data Tables
+
+#### 1. Table: `uploaded_files`
+The `uploaded_files` table contains information about files that have been uploaded. Here is the structure of the table:
+
+- **id**: uuid
+  - A unique identifier for each uploaded file.
+  
+- **user_id**: uuid
+  - The identifier of the user who uploaded the file.
+  
+- **upload_date**: timestamp with time zone
+  - The date and time when the file was uploaded.
+  
+- **rows_count**: integer
+  - The number of rows in the uploaded file.
+  
+- **columns**: jsonb
+  - A JSON object that describes the columns in the uploaded file.
+  
+- **filename**: character varying
+  - The name of the uploaded file.
+  
+- **file_type**: character varying
+  - The type of the uploaded file (e.g., CSV, Excel).
+  
+- **data_table_name**: character varying
+  - The name of the data table associated with the uploaded file.
+
+#### 2. Table: `uploaded_data_cd121cbd`
+The `uploaded_data_cd121cbd` table contains additional uploaded data, likely related to techniques or tactics in a specific context. Here is the structure of the table:
+
+- **title**: character varying
+  - Represents the name or title of the data entry.
+  
+- **tactic**: character varying
+  - Indicates the broader tactic associated with the data entry.
+  
+- **technique**: character varying
+  - A unique identifier for the technique related to the data entry.
+  
+- **secondary_technique**: character varying
+  - An optional secondary technique associated with the entry.
+  
+- **description**: character varying
+  - A detailed explanation of the data entry.
+  
+- **lut_evaluation__with_technique_ranges_**: character varying
+  - Possibly related to evaluation metrics or ranges for the technique.
+  
+- **technique_id_descriptions**: character varying
+  - Descriptions related to the technique identifiers.
+  
+- **unnamed__7**: character varying
+  - An additional field that may require clarification or renaming.
+
+### Summary
+The `uploaded_files` table focuses on the metadata of files uploaded by users, while the `uploaded_data_cd121cbd` table appears to contain specific data entries related to techniques or tactics, possibly in a cybersecurity context. If you need more details or specific data from these tables, feel free to ask!"

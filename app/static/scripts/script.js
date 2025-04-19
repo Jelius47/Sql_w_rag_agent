@@ -20,7 +20,7 @@ document.getElementById("sendButton").addEventListener("click", (e) => {
 let isGeneratingResponse = false;
 
 const FLASK_SERVER_URL = "http://127.0.0.1:5000";
-const FLASK_SERVER_URL_RENDER="https://sql-w-rag-agent.onrender.com/"
+const FLASK_SERVER_URL_RENDER="https://sql-w-rag-agent.onrender.com"
 const API_ROUTES = {
     webSearch: `${FLASK_SERVER_URL_RENDER}/web/search`,
     ragSearch: `${FLASK_SERVER_URL_RENDER}/rag/search`,

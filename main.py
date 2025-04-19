@@ -11,6 +11,7 @@ from sqlalchemy.orm import session
 from app.database import engine,SessionLocal
 from app import models
 
+import os
 
 # creating models
 models.Base.metadata.create_all(bind =engine)
@@ -47,5 +48,8 @@ app.register_blueprint(history_bp)
 def index():
     return render_template('index.html')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Render will inject PORT
+    app.run(host="0.0.0.0", port=port)

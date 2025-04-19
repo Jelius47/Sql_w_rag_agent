@@ -3,6 +3,8 @@ from app.api.db_routes import db_bp
 from app.api.file_routes import file_bp
 from app.api.web_routes import web_bp
 from app.api.rag_routes import rag_bp
+from app.api.history_routes import history_bp
+
 from flask_cors import CORS
 
 from sqlalchemy.orm import session
@@ -39,6 +41,7 @@ app.register_blueprint(db_bp)
 app.register_blueprint(file_bp)
 app.register_blueprint(web_bp)
 app.register_blueprint(rag_bp)
+app.register_blueprint(history_bp)
 
 @app.route('/')
 def index():

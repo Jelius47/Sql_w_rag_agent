@@ -26,6 +26,86 @@ const API_ROUTES = {
     fileUpload: `${FLASK_SERVER_URL}/file/upload`,
     dbQuery: `${FLASK_SERVER_URL}/db/query`
 };
+document.addEventListener("DOMContentLoaded", function () {
+    const userId = "550e8400-e29b-41d4-a716-446655440000"; // Replace with real user ID in production
+    const toggleButton = document.getElementById("toggleSidebar");
+    const sidebar = document.getElementById("sidebar");
+    const chatList = document.getElementById("chatList");
+    const chatWindow = document.getElementById("chatWindow");
+
+    // Toggle sidebar visibility
+    toggleButton.addEventListener("click", function () {
+        sidebar.classList.toggle("active");
+    });
+
+    // Fetch chat titles when the page loads
+    fetchChats(userId);
+
+    // Fetch chat titles
+        // Updated fetchChats with auto-load for latest chat
+    async function fetchChats(userId) {
+        try {
+            const response = await fetch(`/db/${userId}/chats`);
+            const data = await response.json();
+
+            if (data.status === "success") {
+                chatList.innerHTML = "";
+
+                data.chats.forEach((chat, index) => {
+                    const chatItem = document.createElement("li");
+                    chatItem.classList.add("chat-item");
+                    chatItem.innerHTML = `
+                        <span class="chat-title" data-chat-id="${chat.id}">${chat.title}</span>
+                    `;
+                    chatList.appendChild(chatItem);
+
+                    // Load the first chat by default
+                    if (index === 0) {
+                        fetchChatHistory(chat.id);
+                    }
+
+                    chatItem.addEventListener("click", function () {
+                        fetchChatHistory(chat.id);
+                        sidebar.classList.remove("active");
+                    });
+                });
+            } else {
+                console.error("Error fetching chats:", data.message);
+            }
+        } catch (err) {
+            console.error("Error fetching chats:", err);
+        }
+    }
+
+    // Fetch messages for a given chat
+    async function fetchChatHistory(chatId) {
+        try {
+            const response = await fetch(`/db/chats/${chatId}/history`);
+            const data = await response.json();
+
+            if (data.status === "success") {
+                chatWindow.innerHTML = "";
+
+                data.messages.forEach(msg => {
+                    const msgElement = document.createElement("div");
+                    msgElement.className = msg.sender === "user" ? "message user" : "message bot";
+                    msgElement.innerHTML = `
+                        <p><strong>${msg.sender}</strong>: ${msg.content}</p>
+                        <p><small>${new Date(msg.created_at).toLocaleString()}</small></p>
+                    `;
+                    chatWindow.appendChild(msgElement);
+                });
+
+                // Scroll to bottom
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            } else {
+                console.error("Error loading messages:", data.message);
+            }
+        } catch (err) {
+            console.error("Error fetching chat history:", err);
+        }
+    }
+});
 
 const renderMarkdown = (text) => {
     return marked.parse(text || "");

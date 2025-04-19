@@ -20,11 +20,12 @@ document.getElementById("sendButton").addEventListener("click", (e) => {
 let isGeneratingResponse = false;
 
 const FLASK_SERVER_URL = "http://127.0.0.1:5000";
+const FLASK_SERVER_URL_RENDER="https://sql-w-rag-agent.onrender.com/"
 const API_ROUTES = {
-    webSearch: `${FLASK_SERVER_URL}/web/search`,
-    ragSearch: `${FLASK_SERVER_URL}/rag/search`,
-    fileUpload: `${FLASK_SERVER_URL}/file/upload`,
-    dbQuery: `${FLASK_SERVER_URL}/db/query`
+    webSearch: `${FLASK_SERVER_URL_RENDER}/web/search`,
+    ragSearch: `${FLASK_SERVER_URL_RENDER}/rag/search`,
+    fileUpload: `${FLASK_SERVER_URL_RENDER}/file/upload`,
+    dbQuery: `${FLASK_SERVER_URL_RENDER}/db/query`
 };
 document.addEventListener("DOMContentLoaded", function () {
     const userId = "550e8400-e29b-41d4-a716-446655440000"; // Replace with real user ID in production
@@ -256,7 +257,7 @@ function showToast(message, type = 'success') {
 function queryUploadedFile(fileId, sqlQuery) {
     return new Promise(async (resolve, reject) => {
         try {
-            const response = await fetch(`${FLASK_SERVER_URL}/db/query`, {
+            const response = await fetch(`${FLASK_SERVER_URL_RENDER}/db/query`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 

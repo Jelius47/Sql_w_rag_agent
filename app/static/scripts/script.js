@@ -27,6 +27,42 @@ const API_ROUTES = {
     fileUpload: `${FLASK_SERVER_URL_RENDER}/file/upload`,
     dbQuery: `${FLASK_SERVER_URL_RENDER}/db/query`
 };
+const toggleButton = document.getElementById("toggle-btn");
+const sidebar = document.getElementById("sidebar");
+
+function toggleSubMenu(button) {
+    const submenu = button.nextElementSibling;
+
+    if (submenu.classList.contains('show')) {
+        // Submenu is open: close it
+        submenu.classList.remove('show');
+        button.classList.remove('rotate');
+    } else {
+        // Submenu is closed: close all others first
+        closeAllSubmenus();
+        submenu.classList.add('show');
+        button.classList.add('rotate');
+    }
+}
+
+function toggleSidebar() {
+    sidebar.classList.toggle('close');
+    toggleButton.classList.toggle('rotate');
+
+    // If sidebar is closing, close all submenus
+    if (sidebar.classList.contains('close')) {
+        closeAllSubmenus();
+    }
+}
+
+function closeAllSubmenus() {
+    const allSubmenus = document.querySelectorAll('.sub-menu.show');
+    const allRotateButtons = document.querySelectorAll('.sub-menu-toggle.rotate');
+
+    allSubmenus.forEach(submenu => submenu.classList.remove('show'));
+    allRotateButtons.forEach(button => button.classList.remove('rotate'));
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const userId = "550e8400-e29b-41d4-a716-446655440000"; // Replace with real user ID in production
     const toggleButton = document.getElementById("toggleSidebar");
